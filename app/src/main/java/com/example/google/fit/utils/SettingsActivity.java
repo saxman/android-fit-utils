@@ -16,6 +16,7 @@
 
 package com.example.google.fit.utils;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
@@ -54,9 +55,10 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
         fitSwitch = (SwitchCompat) findViewById(R.id.fit_switch);
 
-        mClient = new GoogleApiClient.Builder(this)
+        mClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addApi(Fitness.API)
-                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
+                .addScope(new Scope(Scopes.FITNESS_BODY_READ)) // required by FitPedometerService
+                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ)) // required by FitPedometerService
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
@@ -64,23 +66,29 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
     @Override
     protected void onStart() {
-        // Reset the status if orientation change or activity re-start.
+        // Reset the status if orientation change or activity re-start, to check the current state
+        // of the Fit connection.
         initialFitConnectionCheck = true;
+
         super.onStart();
     }
 
     @Override
     public void onConnected(Bundle bundle) {
+        Log.d(LOG_TAG, "Connected to Google Fit.");
+
         if (initialFitConnectionCheck) {
             fitSwitch.setChecked(true);
             initialFitConnectionCheck = false;
             return;
         }
 
-        Toast toast = Toast.makeText(getApplicationContext(), "Connected to Google Fit.", Toast.LENGTH_LONG);
-        toast.show();
+        Toast.makeText(this, "Connected to Google Fit.", Toast.LENGTH_LONG).show();
 
-        // TODO If necessary, add additional code here for accessing Google Fit here.
+        // TODO if necessary, add additional code here for accessing Google Fit here.
+        Intent intent = new Intent(this, PedometerService.class);
+        intent.putExtra(ACCOUNT_NAME_EXTRA_KEY, accountName);
+        startService(intent);
     }
 
     @Override
@@ -100,13 +108,14 @@ public class SettingsActivity extends GoogleApiClientActivity {
         // Reset the switch since the use cancelled auth.
         fitSwitch.setChecked(false);
 
-        Toast toast = Toast.makeText(getApplicationContext(), "Connection to Google Fit cancelled.", Toast.LENGTH_LONG);
-        toast.show();
+        Toast.makeText(this, "Connection to Google Fit cancelled.", Toast.LENGTH_LONG).show();
 
-        // TODO figure out how to allow the user to select a different account if they cancel at Fit authorization dialog
+        // TODO figure out how to allow the user to select a different account if they cancel at Fit authorization dialog. use mClient.clearDefaultAccountAndReconnect()?
     }
 
     public void onFitSwitchClicked(View view) {
+        // TODO disable switch until connection completed or fails.
+
         if (((CompoundButton) view).isChecked()) {
             mClient.connect();
         } else {
@@ -115,16 +124,17 @@ public class SettingsActivity extends GoogleApiClientActivity {
                 @Override
                 public void onResult(Status status) {
                     if (status.isSuccess()) {
-                        Toast toast = Toast.makeText(getApplicationContext(), "Disconnected from Google Fit.", Toast.LENGTH_LONG);
-                        toast.show();
+                        Toast.makeText(SettingsActivity.this, "Disconnected from Google Fit.", Toast.LENGTH_LONG).show();
+
+                        // TODO if necessary, add Fit disconnect code here
+                        stopService(new Intent(SettingsActivity.this, PedometerService.class));
                     } else {
                         Log.e(LOG_TAG, "Unable to disconnect from Google Fit. " + status.toString());
 
                         // Re-set the switch since auth failed.
                         fitSwitch.setChecked(true);
 
-                        Toast toast = Toast.makeText(getApplicationContext(), "Unable to disconnect from Google Fit. See logcat for details.", Toast.LENGTH_LONG);
-                        toast.show();
+                        Toast.makeText(SettingsActivity.this, "Unable to disconnect from Google Fit. See logcat for details.", Toast.LENGTH_LONG).show();
                     }
                 }
             }, 5, TimeUnit.SECONDS);

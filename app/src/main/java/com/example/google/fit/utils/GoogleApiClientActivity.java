@@ -34,6 +34,10 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
 
     private static final int REQUEST_OAUTH = 1;
 
+    public static final String ACCOUNT_NAME_EXTRA_KEY = "authAccount";
+
+    protected String accountName;
+
     /**
      * Track whether an authorization activity is stacking over the current activity, i.e. when
      * a known auth error is being resolved, such as showing the account chooser or presenting a
@@ -77,6 +81,8 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(LOG_TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
+
+        accountName = data.getStringExtra(ACCOUNT_NAME_EXTRA_KEY);
 
         if (requestCode == REQUEST_OAUTH) {
             authInProgress = false;
