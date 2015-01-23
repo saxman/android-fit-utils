@@ -113,21 +113,20 @@ public class PedometerService extends IntentService
         pendingResult.setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
-                Log.d(LOG_TAG, "Status from registering sensor listener: " + status);
-
                 if (status.isSuccess()) {
-                    Log.d(LOG_TAG, "Listener registered!");
+                    Log.d(LOG_TAG, "Google Fit steps listener registered.");
                 } else {
                     Log.d(LOG_TAG, "Listener not registered. Cause: " + status.toString());
+
                     if (status.hasResolution()) {
                         try {
-                            Log.d(LOG_TAG, "Resolving...");
+                            Log.d(LOG_TAG, "Attempting to resolve.");
                             status.getResolution().send();
                         } catch (PendingIntent.CanceledException e) {
-                            Log.e(LOG_TAG, "Exception while attempting to resolve failed connection to Google Fit.");
+                            Log.e(LOG_TAG, "Exception while attempting to resolve failed attempt to register Google Fit step listener.", e);
                         }
                     } else {
-                        Log.w(LOG_TAG, "Could not resolve failed connection to Google Fit while registering sensor listener.");
+                        Log.e(LOG_TAG, "No resolution to failed attempt to register sensor listener with Google Fit.");
                     }
                 }
             }
