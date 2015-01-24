@@ -82,7 +82,10 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(LOG_TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
 
-        accountName = data.getStringExtra(ACCOUNT_NAME_EXTRA_KEY);
+        // if user selected account or accepted requested scopes, capture their account name.
+        if (resultCode == RESULT_OK) {
+            accountName = data.getStringExtra(ACCOUNT_NAME_EXTRA_KEY);
+        }
 
         if (requestCode == REQUEST_OAUTH) {
             authInProgress = false;
@@ -91,7 +94,7 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
                     mClient.connect();
                 }
             } else {
-                // The user cancelled auth. Allow the subclass to handle it.
+                // The user cancelled auth. Allow the subclass to handle updating the UI, etc.
                 handleAuthCancelled();
             }
         }

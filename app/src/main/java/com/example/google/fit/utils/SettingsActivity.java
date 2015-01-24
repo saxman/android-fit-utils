@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -37,12 +38,14 @@ import java.util.concurrent.TimeUnit;
 
 public class SettingsActivity extends GoogleApiClientActivity {
 
-    public static final String LOG_TAG = SettingsActivity.class.getSimpleName();
+    private static final String LOG_TAG = SettingsActivity.class.getSimpleName();
+
+    private int FIT_DISABLE_TIMEOUT_SECS = 5;
 
     /**
      * Flag to track if this is the initial Fit connection check, to determine the state of the
-     * switch when the activity is started, or if the switch state is already know so the
-     * connection should be completed (i.e. user authorization, if needed).
+     * switch when the activity is started, or if the connection to Fit should be completed
+     * (i.e. account selection, authorization, etc.).
      */
     private boolean initialFitConnectionCheck = true;
 
@@ -77,6 +80,8 @@ public class SettingsActivity extends GoogleApiClientActivity {
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "Connected to Google Fit.");
 
+        fitSwitch.setEnabled(true);
+
         if (initialFitConnectionCheck) {
             fitSwitch.setChecked(true);
             initialFitConnectionCheck = false;
@@ -95,6 +100,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
     public void onConnectionFailed(ConnectionResult result) {
         if (!authInProgress && initialFitConnectionCheck) {
             fitSwitch.setChecked(false);
+            fitSwitch.setEnabled(true);
             initialFitConnectionCheck = false;
         } else {
             handleAuthFailure(result);
@@ -107,14 +113,16 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
         // Reset the switch since the use cancelled auth.
         fitSwitch.setChecked(false);
+        fitSwitch.setEnabled(true);
 
         Toast.makeText(this, "Connection to Google Fit cancelled.", Toast.LENGTH_LONG).show();
 
-        // TODO figure out how to allow the user to select a different account if they cancel at Fit authorization dialog. use mClient.clearDefaultAccountAndReconnect()?
+        // TODO figure out how to allow the user to select a different account if they cancel at Fit authorization dialog.
     }
 
     public void onFitSwitchClicked(View view) {
-        // TODO disable switch until connection completed or fails.
+        // disable switch until connection completed or fails
+        fitSwitch.setEnabled(false);
 
         if (((CompoundButton) view).isChecked()) {
             mClient.connect();
@@ -123,11 +131,15 @@ public class SettingsActivity extends GoogleApiClientActivity {
             pendingResult.setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
-                    if (status.isSuccess()) {
-                        Toast.makeText(SettingsActivity.this, "Disconnected from Google Fit.", Toast.LENGTH_LONG).show();
+                    fitSwitch.setEnabled(true);
 
-                        // TODO if necessary, add Fit disconnect code here
+                    if (status.isSuccess()) {
+                        mClient.disconnect();
+
+                        // TODO if necessary, add additional Fit disconnect code here
                         stopService(new Intent(SettingsActivity.this, PedometerService.class));
+
+                        Toast.makeText(SettingsActivity.this, "Disconnected from Google Fit.", Toast.LENGTH_LONG).show();
                     } else {
                         Log.e(LOG_TAG, "Unable to disconnect from Google Fit. " + status.toString());
 
@@ -137,7 +149,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
                         Toast.makeText(SettingsActivity.this, "Unable to disconnect from Google Fit. See logcat for details.", Toast.LENGTH_LONG).show();
                     }
                 }
-            }, 5, TimeUnit.SECONDS);
+            }, FIT_DISABLE_TIMEOUT_SECS, TimeUnit.SECONDS);
         }
     }
 }

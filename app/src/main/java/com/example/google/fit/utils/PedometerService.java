@@ -87,8 +87,6 @@ public class PedometerService extends IntentService
     public void onDestroy() {
         super.onDestroy();
 
-        // TODO need to unregister the listener?
-
         if (mClient.isConnected()) {
             mClient.disconnect();
         }
@@ -116,11 +114,11 @@ public class PedometerService extends IntentService
                 if (status.isSuccess()) {
                     Log.d(LOG_TAG, "Google Fit steps listener registered.");
                 } else {
-                    Log.d(LOG_TAG, "Listener not registered. Cause: " + status.toString());
+                    Log.d(LOG_TAG, "Google Fit steps listener not registered. Cause: " + status.toString());
 
                     if (status.hasResolution()) {
                         try {
-                            Log.d(LOG_TAG, "Attempting to resolve.");
+                            Log.d(LOG_TAG, "Google Fit steps listener not registered. Attempting to resolve.");
                             status.getResolution().send();
                         } catch (PendingIntent.CanceledException e) {
                             Log.e(LOG_TAG, "Exception while attempting to resolve failed attempt to register Google Fit step listener.", e);
