@@ -24,7 +24,6 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,7 +39,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
     private static final String LOG_TAG = SettingsActivity.class.getSimpleName();
 
-    private int FIT_DISABLE_TIMEOUT_SECS = 5;
+    private static final int FIT_DISABLE_TIMEOUT_SECS = 5;
 
     /**
      * Flag to track if this is the initial Fit connection check, to determine the state of the
@@ -58,7 +57,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
         fitSwitch = (SwitchCompat) findViewById(R.id.fit_switch);
 
-        mClient = new GoogleApiClient.Builder(getApplicationContext())
+        mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addApi(Fitness.API)
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ)) // required by FitPedometerService
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ)) // required by FitPedometerService
@@ -125,16 +124,16 @@ public class SettingsActivity extends GoogleApiClientActivity {
         fitSwitch.setEnabled(false);
 
         if (((CompoundButton) view).isChecked()) {
-            mClient.connect();
+            mGoogleApiClient.connect();
         } else {
-            PendingResult<Status> pendingResult = Fitness.ConfigApi.disableFit(mClient);
+            PendingResult<Status> pendingResult = Fitness.ConfigApi.disableFit(mGoogleApiClient);
             pendingResult.setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
                     fitSwitch.setEnabled(true);
 
                     if (status.isSuccess()) {
-                        mClient.disconnect();
+                        mGoogleApiClient.disconnect();
 
                         // TODO if necessary, add additional Fit disconnect code here
                         stopService(new Intent(SettingsActivity.this, PedometerService.class));

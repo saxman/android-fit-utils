@@ -50,7 +50,7 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
      * GoogleApiClient which can be used by a subclass to access Google services. This variable
      * must be initialized by the subclass in onCreate.
      */
-    protected GoogleApiClient mClient = null;
+    protected GoogleApiClient mGoogleApiClient = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,15 +66,15 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
         super.onStart();
 
         Log.d(LOG_TAG, "Connecting to GoogleApiClient.");
-        mClient.connect();
+        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        if (mClient.isConnected()) {
-            mClient.disconnect();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
         }
     }
 
@@ -90,8 +90,8 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
         if (requestCode == REQUEST_OAUTH) {
             authInProgress = false;
             if (resultCode == RESULT_OK) {
-                if (!mClient.isConnecting() && !mClient.isConnected()) {
-                    mClient.connect();
+                if (!mGoogleApiClient.isConnecting() && !mGoogleApiClient.isConnected()) {
+                    mGoogleApiClient.connect();
                 }
             } else {
                 // The user cancelled auth. Allow the subclass to handle updating the UI, etc.
