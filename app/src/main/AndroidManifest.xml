@@ -18,7 +18,7 @@
         </activity>
 
         <service
-            android:name=".PedometerService"
+            android:name=".FitPedometerService"
             android:exported="false" />
     </application>
 

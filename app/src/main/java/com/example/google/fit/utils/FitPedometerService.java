@@ -39,15 +39,17 @@ import com.google.android.gms.fitness.request.SensorRequest;
 
 import java.util.concurrent.TimeUnit;
 
-public class PedometerService extends IntentService
+public class FitPedometerService extends IntentService
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnDataPointListener {
 
-    private static final String LOG_TAG = PedometerService.class.getSimpleName();
+    private static final String LOG_TAG = FitPedometerService.class.getSimpleName();
+
+    private static final int PEDOMETER_SAMPLE_RATE_MS = 100;
 
     protected GoogleApiClient mClient = null;
 
-    public PedometerService() {
-        super("FitPedometerService");
+    public FitPedometerService() {
+        super(FitPedometerService.class.getSimpleName());
     }
 
     @Override
@@ -103,7 +105,7 @@ public class PedometerService extends IntentService
         // TODO best way to get real-time updates?
         SensorRequest sensorRequest = new SensorRequest.Builder()
                 .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
-                .setSamplingRate(100, TimeUnit.MILLISECONDS)
+                .setSamplingRate(PEDOMETER_SAMPLE_RATE_MS, TimeUnit.MILLISECONDS)
                 .build();
 
         PendingResult<Status> pendingResult = Fitness.SensorsApi.add(mClient, sensorRequest, this);

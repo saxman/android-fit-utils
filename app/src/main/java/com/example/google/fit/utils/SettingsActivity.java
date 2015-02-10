@@ -90,7 +90,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
         Toast.makeText(this, "Connected to Google Fit.", Toast.LENGTH_LONG).show();
 
         // TODO if necessary, add additional code here for accessing Google Fit here.
-        Intent intent = new Intent(this, PedometerService.class);
+        Intent intent = new Intent(this, FitPedometerService.class);
         intent.putExtra(ACCOUNT_NAME_EXTRA_KEY, accountName);
         startService(intent);
     }
@@ -136,7 +136,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
                         mGoogleApiClient.disconnect();
 
                         // TODO if necessary, add additional Fit disconnect code here
-                        stopService(new Intent(SettingsActivity.this, PedometerService.class));
+                        stopService(new Intent(SettingsActivity.this, FitPedometerService.class));
 
                         Toast.makeText(SettingsActivity.this, "Disconnected from Google Fit.", Toast.LENGTH_LONG).show();
                     } else {
