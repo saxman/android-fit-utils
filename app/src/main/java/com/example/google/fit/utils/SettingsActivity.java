@@ -46,19 +46,19 @@ public class SettingsActivity extends GoogleApiClientActivity {
      * switch when the activity is started, or if the connection to Fit should be completed
      * (i.e. account selection, authorization, etc.).
      */
-    private boolean initialFitConnectionCheck = true;
+    private boolean mInitialFitConnectionCheck = true;
 
-    private SwitchCompat fitSwitch;
+    private SwitchCompat mFitConnectionSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fitSwitch = (SwitchCompat) findViewById(R.id.fit_switch);
+        mFitConnectionSwitch = (SwitchCompat) findViewById(R.id.fit_switch);
 
         mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
-                .addApi(Fitness.API)
+                .addApi(Fitness.CONFIG_API)
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ)) // required by FitPedometerService
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ)) // required by FitPedometerService
                 .addConnectionCallbacks(this)
@@ -70,7 +70,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
     protected void onStart() {
         // Reset the status if orientation change or activity re-start, to check the current state
         // of the Fit connection.
-        initialFitConnectionCheck = true;
+        mInitialFitConnectionCheck = true;
 
         super.onStart();
     }
@@ -79,11 +79,10 @@ public class SettingsActivity extends GoogleApiClientActivity {
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "Connected to Google Fit.");
 
-        fitSwitch.setEnabled(true);
+        mFitConnectionSwitch.setEnabled(true);
 
-        if (initialFitConnectionCheck) {
-            fitSwitch.setChecked(true);
-            initialFitConnectionCheck = false;
+        if (mInitialFitConnectionCheck) {
+            mFitConnectionSwitch.setChecked(true);
             return;
         }
 
@@ -97,10 +96,10 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        if (!authInProgress && initialFitConnectionCheck) {
-            fitSwitch.setChecked(false);
-            fitSwitch.setEnabled(true);
-            initialFitConnectionCheck = false;
+        if (!authInProgress && mInitialFitConnectionCheck) {
+            mFitConnectionSwitch.setChecked(false);
+            mFitConnectionSwitch.setEnabled(true);
+            mInitialFitConnectionCheck = false;
         } else {
             handleAuthFailure(result);
         }
@@ -111,8 +110,8 @@ public class SettingsActivity extends GoogleApiClientActivity {
         Log.d(LOG_TAG, "Connection to Google Fit cancelled.");
 
         // Reset the switch since the use cancelled auth.
-        fitSwitch.setChecked(false);
-        fitSwitch.setEnabled(true);
+        mFitConnectionSwitch.setChecked(false);
+        mFitConnectionSwitch.setEnabled(true);
 
         Toast.makeText(this, "Connection to Google Fit cancelled.", Toast.LENGTH_LONG).show();
 
@@ -121,7 +120,8 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
     public void onFitSwitchClicked(View view) {
         // disable switch until connection completed or fails
-        fitSwitch.setEnabled(false);
+        mFitConnectionSwitch.setEnabled(false);
+        mInitialFitConnectionCheck = false;
 
         if (((CompoundButton) view).isChecked()) {
             mGoogleApiClient.connect();
@@ -130,7 +130,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
             pendingResult.setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
-                    fitSwitch.setEnabled(true);
+                    mFitConnectionSwitch.setEnabled(true);
 
                     if (status.isSuccess()) {
                         mGoogleApiClient.disconnect();
@@ -143,7 +143,7 @@ public class SettingsActivity extends GoogleApiClientActivity {
                         Log.e(LOG_TAG, "Unable to disconnect from Google Fit. " + status.toString());
 
                         // Re-set the switch since auth failed.
-                        fitSwitch.setChecked(true);
+                        mFitConnectionSwitch.setChecked(true);
 
                         Toast.makeText(SettingsActivity.this, "Unable to disconnect from Google Fit. See logcat for details.", Toast.LENGTH_LONG).show();
                     }

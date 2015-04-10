@@ -74,7 +74,8 @@ public class FitPedometerService extends IntentService
 
         String accountName = intent.getStringExtra(GoogleApiClientActivity.ACCOUNT_NAME_EXTRA_KEY);
         mClient = new GoogleApiClient.Builder(getApplicationContext())
-                .addApi(Fitness.API)
+                .addApi(Fitness.SENSORS_API)
+                .addApi(Fitness.CONFIG_API)
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ))
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
                 .setAccountName(accountName)

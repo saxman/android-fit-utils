@@ -82,8 +82,8 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(LOG_TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
 
-        // if user selected account or accepted requested scopes, capture their account name.
-        if (resultCode == RESULT_OK) {
+        // If user selected account or accepted requested scopes, capture their account name.
+        if (resultCode == RESULT_OK && data != null) {
             accountName = data.getStringExtra(ACCOUNT_NAME_EXTRA_KEY);
         }
 
