@@ -90,7 +90,6 @@ public class SettingsActivity extends GoogleApiClientActivity {
 
         // TODO if necessary, add additional code here for accessing Google Fit here.
         Intent intent = new Intent(this, FitPedometerService.class);
-        intent.putExtra(ACCOUNT_NAME_EXTRA_KEY, accountName);
         startService(intent);
     }
 

@@ -19,7 +19,7 @@ package com.example.google.fit.utils;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -27,16 +27,12 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 
-public abstract class GoogleApiClientActivity extends ActionBarActivity
+public abstract class GoogleApiClientActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     public static final String LOG_TAG = GoogleApiClientActivity.class.getSimpleName();
 
     private static final int REQUEST_OAUTH = 1;
-
-    public static final String ACCOUNT_NAME_EXTRA_KEY = "authAccount";
-
-    protected String accountName;
 
     /**
      * Track whether an authorization activity is stacking over the current activity, i.e. when
@@ -81,11 +77,6 @@ public abstract class GoogleApiClientActivity extends ActionBarActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(LOG_TAG, "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
-
-        // If user selected account or accepted requested scopes, capture their account name.
-        if (resultCode == RESULT_OK && data != null) {
-            accountName = data.getStringExtra(ACCOUNT_NAME_EXTRA_KEY);
-        }
 
         if (requestCode == REQUEST_OAUTH) {
             authInProgress = false;

@@ -72,13 +72,11 @@ public class FitPedometerService extends IntentService
 
         super.onStart(intent, startId);
 
-        String accountName = intent.getStringExtra(GoogleApiClientActivity.ACCOUNT_NAME_EXTRA_KEY);
         mClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addApi(Fitness.SENSORS_API)
                 .addApi(Fitness.CONFIG_API)
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ))
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
-                .setAccountName(accountName)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
@@ -103,7 +101,6 @@ public class FitPedometerService extends IntentService
     public void onConnected(Bundle bundle) {
         Log.d(LOG_TAG, "Connection to Google Fit succeeded. Registering sensor listener.");
 
-        // TODO best way to get real-time updates?
         SensorRequest sensorRequest = new SensorRequest.Builder()
                 .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
                 .setSamplingRate(PEDOMETER_SAMPLE_RATE_MS, TimeUnit.MILLISECONDS)
@@ -159,6 +156,6 @@ public class FitPedometerService extends IntentService
 
     @Override
     public void onDataPoint(DataPoint dataPoint) {
-        Log.i(LOG_TAG, "Steps delta: " + dataPoint.getValue(Field.FIELD_STEPS));
+        Log.i(LOG_TAG, "Steps delta: " + dataPoint.getValue(Field.FIELD_STEPS) + " at " + dataPoint.getTimestamp(TimeUnit.MILLISECONDS));
     }
 }
