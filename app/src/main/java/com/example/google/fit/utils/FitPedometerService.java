@@ -54,27 +54,20 @@ public class FitPedometerService extends IntentService
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(LOG_TAG, "onBind(Intent)");
-
         return super.onBind(intent);
     }
 
     @Override
     public void onCreate() {
-        Log.d(LOG_TAG, "onCreate()");
-
         super.onCreate();
     }
 
     @Override
     public void onStart(Intent intent, int startId) {
-        Log.d(LOG_TAG, "onStart()");
-
         super.onStart(intent, startId);
 
         mClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addApi(Fitness.SENSORS_API)
-                .addApi(Fitness.CONFIG_API)
                 .addScope(new Scope(Scopes.FITNESS_BODY_READ))
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ))
                 .addConnectionCallbacks(this)
@@ -144,8 +137,8 @@ public class FitPedometerService extends IntentService
                 Log.e(LOG_TAG, "Exception while attempting to resolve failed connection to Google Fit.");
             }
         } else {
-            Log.w(LOG_TAG, "Could not resolve failed connection to Google Fit.");
-            // TODO shutdown the service?
+            Log.w(LOG_TAG, "Could not resolve failed connection to Google Fit. Shutting down.");
+            stopSelf();
         }
     }
 
